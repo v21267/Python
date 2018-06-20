@@ -3,10 +3,12 @@
 CREATE OR REPLACE FUNCTION fn_set_metrics_data
 (
 	p_date integer,
-	p_code varcvhar(50),
+	p_code varchar(50),
 	p_value integer
-)
+) RETURNS VOID
 AS $BODY$
+DECLARE
+	v_row_count integer;
 BEGIN
 	INSERT INTO MetricsData
 	(
@@ -28,18 +30,18 @@ BEGIN
 			WHERE
 				md.Date = p_date
 			AND	md.MetricsCode = p_code
-		)
-	;
+		);
 
-	IF ROW_COUNT = 0
-	BEGIN
+	GET DIAGNOSTICS v_row_count = ROW_COUNT;
+	IF v_row_count = 0
+	THEN
 		UPDATE
 			MetricsData md
 		SET
 			MetricsValue = p_value
 		WHERE
 			md.Date = p_date
-		AND	md.MetricsCode = p_code
+		AND	md.MetricsCode = p_code;
 	END IF;
 
 	RETURN;
@@ -49,3 +51,4 @@ LANGUAGE plpgsql;
 
 
 -- select * from fn_get_metrics_data(20120101)
+-- select fn_set_metrics_data(20120101, 'CALLS_LIVE', 13)
