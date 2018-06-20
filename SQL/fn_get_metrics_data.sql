@@ -1,30 +1,30 @@
---DROP FUNCTION fn_get_metrics_data;
+﻿-- DROP FUNCTION fn_get_metrics_data;
 
-CREATE OR REPLACE FUNCTION fn_get_metrics_data(p_date date) 
+CREATE OR REPLACE FUNCTION fn_get_metrics_data(p_date integer) 
 RETURNS TABLE
 (
-	"Date" date,	
-	"MetricsCode" varchar(50),
-	"MetricsDescription" varchar(100),
-	"MetricsType" varchar(10),
-	"Color" varchar(30),
-	"MetricsValue" decimal
+	date integer,	
+	code varchar(50),
+	description varchar(100),
+	type varchar(10),
+	color varchar(30),
+	value integer
 )
 AS $BODY$
 BEGIN
     RETURN QUERY 
 	SELECT
-		p_date as "Date",
-		def.MetricsCode,
-		def.MetricsDescription,
-		def.MetricsType,
-		def.Color,
-		COALESCE(d.MetricsValue::decimal, 0::decimal) AS MetricsValue
+		p_date as date,
+		def.MetricsCode as code,
+		def.MetricsDescription as description,
+		def.MetricsType as type,
+		def.Color as color,
+		COALESCE(d.MetricsValue, 0) AS value
 	FROM
 		MetricsDefinition def
 	LEFT OUTER JOIN
 		MetricsData d ON d.MetricsCode = def.MetricsCode
-					 AND d.Date = p_date
+			     AND d.Date = p_date
 	ORDER BY
 		def.SortOrder;
 
@@ -34,4 +34,4 @@ $BODY$
 LANGUAGE plpgsql;
 
 
---select * from fn_get_metrics_data('2012/01/01')
+-- select * from fn_get_metrics_data(20120101)

@@ -6,6 +6,32 @@ from mysite import settings
 class DbHelper:
 
 	@staticmethod
+	def run_query_sp(spname, params):
+		return DbHelper._execute_sp_int(True, spname, params)
+
+	@staticmethod
+	def execute_sp(spname, params):
+		DbHelper._execute_sp_int(False, spname, params)
+
+	@staticmethod
+	def _execute_sp_int(as_query, spname, params):
+		conn = None
+		try:
+			conn = DbHelper._open_conn()
+			cur = conn.cursor()
+			cur.callproc(spname, params)
+			if as_query:
+				result = DbHelper._cursor_as_object_list(cur)
+				return result
+			else:
+				conn.commit()
+		except (psycopg2.Error, Exception) as error:
+			print(error)
+			raise
+		finally:
+			DbHelper._close_conn(conn)
+
+	@staticmethod
 	def _open_conn():
 		conn_str = settings.PGSQL_CONN_STR
 		conn = psycopg2.connect( \
@@ -18,21 +44,6 @@ class DbHelper:
 		if conn is not None:
 			conn.close()
 
-	@staticmethod
-	def run_query_sp(spname, params):
-		conn = None
-		try:
-			conn = DbHelper._open_conn()
-			cur = conn.cursor()
-			cur.callproc(spname, params)
-			result = DbHelper._cursor_as_object_list(cur)
-			return result
-		except (psycopg2.Error, Exception) as error:
-			print(error)
-			raise
-		finally:
-			DbHelper._close_conn(conn)
-	
 	@staticmethod
 	def _cursor_as_object_list(cur):
 		result = []
