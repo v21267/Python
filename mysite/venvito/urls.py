@@ -7,4 +7,5 @@ urlpatterns = [
 #    path('api/MetricsData/<int:date>', views.metrics_data, name='metrics_data'),
     path('MetricsData/<int:date>', views.MetricsDataView.as_view(), name='get_metrics_data'),
     path('MetricsData/', views.MetricsDataView.as_view(), name='update_metrics_data'),
+    path('MetricsChart/<date_range>', views.MetricsChartView.as_view(), name='get_metrics_chart_data'),
 ]
